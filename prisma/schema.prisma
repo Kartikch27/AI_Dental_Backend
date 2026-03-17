@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum NodeType {
+  YEAR
+  SUBJECT
+  CHAPTER
+  CONCEPT
+}
+
+enum GenerationType {
+  EXAM_NOTES
+  QUICK_NOTES
+  DETAILED_EXPLANATION
+  BULLET_REVISION
+  TEST_PAPER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String?
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notes      NoteGeneration[]
+  testPapers TestPaperGeneration[]
+  vivaSessions VivaSession[]
+  bookmarks  SavedItem[]
+  sources    GenerationSource[]
+}
+
+model SyllabusNode {
+  id          String   @id @default(uuid())
+  name        String
+  type        NodeType
+  parentId    String?
+  parent      SyllabusNode?  @relation("ParentChild", fields: [parentId], references: [id])
+  children    SyllabusNode[] @relation("ParentChild")
+  orderIndex  Int      @default(0)
+
+  notes      NoteGeneration[]
+  testPapers TestPaperGeneration[]
+  vivaSessions VivaSession[]
+  ragDocuments RagDocument[]
+  ragChunks    RagChunk[]
+}
+
+enum IngestionStatus {
+  PENDING
+  PROCESSING
+  INDEXED
+  FAILED
+}
+
+model RagDocument {
+  id            String   @id @default(uuid())
+  title         String
+  sourceType    String   // textbook, notes, exam_paper, etc.
+  inputMethod   String   @default("text") // text, upload
+  fileUrl       String?
+  fileName      String?
+  mimeType      String?
+  yearId        String?
+  subjectId     String?
+  chapterId     String?
+  conceptId     String?
+  nodeId        String?
+  node          SyllabusNode? @relation(fields: [nodeId], references: [id])
+  status          String   @default("active") // active, inactive
+  ingestionStatus IngestionStatus @default(PENDING)
+  failureReason   String?  @db.Text
+  processedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  chunks          RagChunk[]
+}
+
+model RagChunk {
+  id            String   @id @default(uuid())
+  documentId    String
+  document      RagDocument @relation(fields: [documentId], references: [id])
+  chunkIndex    Int
+  content       String   @db.Text
+  tokenCount    Int
+  pageNumber    Int?
+  sectionTitle  String?
+  yearId        String?
+  subjectId     String?
+  chapterId     String?
+  conceptId     String?
+  nodeId        String?
+  node          SyllabusNode? @relation(fields: [nodeId], references: [id])
+  embedding     Unsupported("vector(3072)")?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  generationSources GenerationSource[]
+}
+
+model GenerationSource {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  generationType String  // note, test_paper, viva
+  generationId  String   // UUID of NoteGeneration, etc.
+  chunkId       String
+  chunk         RagChunk @relation(fields: [chunkId], references: [id])
+  relevanceScore Float?
+  createdAt     DateTime @default(now())
+}
+
+model NoteGeneration {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  nodeId    String
+  node      SyllabusNode @relation(fields: [nodeId], references: [id])
+  style     GenerationType
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model TestPaperGeneration {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  nodeId    String
+  node      SyllabusNode @relation(fields: [nodeId], references: [id])
+  config    Json     // difficulty, examType, questionCount, questionTypes
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model VivaSession {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  nodeId    String
+  node      SyllabusNode @relation(fields: [nodeId], references: [id])
+  status    String   @default("active") // active, completed
+  score     Int?
+  feedback  String?
+  messages  VivaMessage[]
+  createdAt DateTime @default(now())
+}
+
+model VivaMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  session   VivaSession @relation(fields: [sessionId], references: [id])
+  role      String   // student, examiner
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model SavedItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  itemId    String   // ID of Note or TestPaper
+  itemType  String   // note, test_paper
+  createdAt DateTime @default(now())
+}
+
+model PromptTemplate {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  template  String   @db.Text
+  type      GenerationType
+}

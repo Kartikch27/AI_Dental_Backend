@@ -1,0 +1,41 @@
+import { PrismaService } from '../../prisma/prisma.service';
+import type { AIProvider } from '../ai/ai.provider.interface';
+import { RagService } from '../rag/rag.service';
+export declare class TestPapersService {
+    private prisma;
+    private ai;
+    private ragService;
+    constructor(prisma: PrismaService, ai: AIProvider, ragService: RagService);
+    generateTest(userId: string, nodeId: string, config: any): Promise<{
+        node: {
+            id: string;
+            name: string;
+            type: import(".prisma/client").$Enums.NodeType;
+            orderIndex: number;
+            parentId: string | null;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        nodeId: string;
+        content: string;
+        userId: string;
+        config: import("@prisma/client/runtime/library").JsonValue;
+    }>;
+    getHistory(userId: string): Promise<({
+        node: {
+            id: string;
+            name: string;
+            type: import(".prisma/client").$Enums.NodeType;
+            orderIndex: number;
+            parentId: string | null;
+        };
+    } & {
+        id: string;
+        createdAt: Date;
+        nodeId: string;
+        content: string;
+        userId: string;
+        config: import("@prisma/client/runtime/library").JsonValue;
+    })[]>;
+}
