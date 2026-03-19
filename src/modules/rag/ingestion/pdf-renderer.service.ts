@@ -15,7 +15,7 @@ const execFileAsync = promisify(execFile);
 @Injectable()
 export class PdfRendererService {
   private readonly logger = new Logger(PdfRendererService.name);
-  private readonly gsPath = '/opt/homebrew/bin/gs';
+  private readonly gsPath = process.env.GHOSTSCRIPT_PATH || 'gs';
 
   isScannedPdf(extractedText: string, pageCount: number): boolean {
     const realText = extractedText.replace(/--\s*\d+\s*of\s*\d+\s*--/g, '').trim();
