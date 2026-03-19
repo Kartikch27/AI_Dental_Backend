@@ -14,15 +14,15 @@ export declare class NotesService {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            parentId: string | null;
             orderIndex: number;
+            parentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
+        content: string;
         nodeId: string;
         style: import(".prisma/client").$Enums.GenerationType;
-        content: string;
         userId: string;
     }>;
     getUserNotes(userId: string): Promise<({
@@ -30,15 +30,15 @@ export declare class NotesService {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            parentId: string | null;
             orderIndex: number;
+            parentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
+        content: string;
         nodeId: string;
         style: import(".prisma/client").$Enums.GenerationType;
-        content: string;
         userId: string;
     })[]>;
 }

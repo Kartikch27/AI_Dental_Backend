@@ -7,14 +7,14 @@ export declare class TestPapersController {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            parentId: string | null;
             orderIndex: number;
+            parentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
-        nodeId: string;
         content: string;
+        nodeId: string;
         userId: string;
         config: import("@prisma/client/runtime/library").JsonValue;
     }>;
@@ -23,14 +23,14 @@ export declare class TestPapersController {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            parentId: string | null;
             orderIndex: number;
+            parentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
-        nodeId: string;
         content: string;
+        nodeId: string;
         userId: string;
         config: import("@prisma/client/runtime/library").JsonValue;
     })[]>;

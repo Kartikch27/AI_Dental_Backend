@@ -17,7 +17,7 @@ const promises_1 = require("fs/promises");
 const execFileAsync = (0, util_1.promisify)(child_process_1.execFile);
 let PdfRendererService = PdfRendererService_1 = class PdfRendererService {
     logger = new common_1.Logger(PdfRendererService_1.name);
-    gsPath = '/opt/homebrew/bin/gs';
+    gsPath = process.env.GHOSTSCRIPT_PATH || 'gs';
     isScannedPdf(extractedText, pageCount) {
         const realText = extractedText.replace(/--\s*\d+\s*of\s*\d+\s*--/g, '').trim();
         const charsPerPage = pageCount > 0 ? realText.length / pageCount : 0;

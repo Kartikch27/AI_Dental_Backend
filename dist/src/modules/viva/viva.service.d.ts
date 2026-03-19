@@ -11,8 +11,8 @@ export declare class VivaService {
     startSession(userId: string, nodeId: string): Promise<{
         session: {
             id: string;
-            status: string;
             createdAt: Date;
+            status: string;
             nodeId: string;
             userId: string;
             score: number | null;
@@ -23,9 +23,9 @@ export declare class VivaService {
     processAnswer(sessionId: string, answer: string): Promise<string>;
     getSessionHistory(sessionId: string): Promise<{
         id: string;
+        role: string;
         createdAt: Date;
         text: string;
-        role: string;
         sessionId: string;
     }[]>;
 }

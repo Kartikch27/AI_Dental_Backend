@@ -8,6 +8,8 @@ export declare class RagService {
     constructor(prisma: PrismaService, ingestionService: IngestionService, retrievalService: RetrievalService);
     ingestDocument(title: string, content: string, metadata: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -22,12 +24,12 @@ export declare class RagService {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
         nodeId: string | null;
     }>;
     ingestFile(title: string, file: any, metadata: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -42,8 +44,6 @@ export declare class RagService {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
         nodeId: string | null;
     }>;
     retrieveContext(query: string, scope: {
@@ -54,18 +54,20 @@ export declare class RagService {
         conceptId?: string;
     }, limit?: number): Promise<import("./retrieval/retrieval.types").RetrievedChunk[]>;
     getDocumentById(id: string): Promise<{
+        _count: {
+            chunks: number;
+        };
         node: {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            parentId: string | null;
             orderIndex: number;
+            parentId: string | null;
         } | null;
-        _count: {
-            chunks: number;
-        };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -80,8 +82,6 @@ export declare class RagService {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
         nodeId: string | null;
     }>;
     deleteDocument(id: string): Promise<{

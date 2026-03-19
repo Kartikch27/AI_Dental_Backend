@@ -56,6 +56,8 @@ export declare class RagAdminController {
         metadata: any;
     }): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -70,12 +72,12 @@ export declare class RagAdminController {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
         nodeId: string | null;
     }>;
     ingestFile(file: any, title: string, metadataStr: string): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -90,8 +92,6 @@ export declare class RagAdminController {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
         nodeId: string | null;
     }>;
     retryIngestion(id: string): Promise<{
@@ -99,18 +99,20 @@ export declare class RagAdminController {
     }>;
     listDocuments(): Promise<any>;
     getDocumentById(id: string): Promise<{
+        _count: {
+            chunks: number;
+        };
         node: {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            parentId: string | null;
             orderIndex: number;
+            parentId: string | null;
         } | null;
-        _count: {
-            chunks: number;
-        };
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -125,8 +127,6 @@ export declare class RagAdminController {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        createdAt: Date;
-        updatedAt: Date;
         nodeId: string | null;
     }>;
     getChunks(id: string): Promise<any>;
