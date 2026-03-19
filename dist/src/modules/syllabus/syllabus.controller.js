@@ -24,8 +24,19 @@ let SyllabusController = class SyllabusController {
     async getRoots() {
         return this.syllabusService.getRoots();
     }
+    async getFullTree() {
+        return this.syllabusService.getFullTree();
+    }
     async getChildren(id) {
         return this.syllabusService.getChildren(id);
+    }
+    async getNodePath(id) {
+        const nodePath = await this.syllabusService.getNodePath(id);
+        const scope = await this.syllabusService.resolveAncestorScope(id);
+        return { ...nodePath, scope };
+    }
+    async createNode(body) {
+        return this.syllabusService.createNode(body);
     }
 };
 exports.SyllabusController = SyllabusController;
@@ -37,13 +48,36 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SyllabusController.prototype, "getRoots", null);
 __decorate([
+    (0, common_1.Get)('tree'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get the full syllabus tree (nested)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SyllabusController.prototype, "getFullTree", null);
+__decorate([
     (0, common_1.Get)(':id/children'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get children of a node' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get direct children of a node' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SyllabusController.prototype, "getChildren", null);
+__decorate([
+    (0, common_1.Get)(':id/path'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get breadcrumb path and ancestor scope for a node' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SyllabusController.prototype, "getNodePath", null);
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new syllabus node' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SyllabusController.prototype, "createNode", null);
 exports.SyllabusController = SyllabusController = __decorate([
     (0, swagger_1.ApiTags)('Syllabus'),
     (0, common_1.Controller)('syllabus'),

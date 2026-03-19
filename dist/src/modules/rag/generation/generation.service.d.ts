@@ -1,9 +1,8 @@
 import { RetrievalService } from '../retrieval/retrieval.service';
-import { OpenAI } from 'openai';
 export declare class GenerationService {
     private retrievalService;
     private readonly logger;
-    private openai;
+    private genai;
     constructor(retrievalService: RetrievalService);
     generateResponse(query: string, scope?: {
         nodeId?: string;
@@ -14,7 +13,5 @@ export declare class GenerationService {
     }, history?: {
         role: 'user' | 'assistant';
         content: string;
-    }[]): Promise<import("openai/core/streaming.js").Stream<OpenAI.Chat.Completions.ChatCompletionChunk> & {
-        _request_id?: string | null;
-    }>;
+    }[]): Promise<AsyncGenerator<import("@google/genai", { with: { "resolution-mode": "import" } }).GenerateContentResponse, any, any>>;
 }

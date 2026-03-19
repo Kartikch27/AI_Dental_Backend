@@ -5,8 +5,8 @@ export declare class VivaController {
     start(req: any, body: any): Promise<{
         session: {
             id: string;
-            createdAt: Date;
             status: string;
+            createdAt: Date;
             nodeId: string;
             userId: string;
             score: number | null;
@@ -17,9 +17,9 @@ export declare class VivaController {
     answer(body: any): Promise<string>;
     getHistory(id: string): Promise<{
         id: string;
-        role: string;
         createdAt: Date;
         text: string;
+        role: string;
         sessionId: string;
     }[]>;
 }

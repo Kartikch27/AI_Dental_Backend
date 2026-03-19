@@ -29,7 +29,7 @@ let RagController = class RagController {
         try {
             const stream = await this.generationService.generateResponse(query, scope, history);
             for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || '';
+                const content = chunk.text || '';
                 if (content) {
                     res.write(`data: ${JSON.stringify({ text: content })}\n\n`);
                 }

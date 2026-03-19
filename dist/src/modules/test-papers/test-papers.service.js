@@ -17,20 +17,24 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const ai_provider_interface_1 = require("../ai/ai.provider.interface");
 const rag_service_1 = require("../rag/rag.service");
+const syllabus_service_1 = require("../syllabus/syllabus.service");
 let TestPapersService = class TestPapersService {
     prisma;
     ai;
     ragService;
-    constructor(prisma, ai, ragService) {
+    syllabusService;
+    constructor(prisma, ai, ragService, syllabusService) {
         this.prisma = prisma;
         this.ai = ai;
         this.ragService = ragService;
+        this.syllabusService = syllabusService;
     }
     async generateTest(userId, nodeId, config) {
         const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
         if (!node)
             throw new Error('Node not found');
-        const contextChunks = await this.ragService.retrieveContext(node.name, { nodeId }, 10);
+        const scope = await this.syllabusService.resolveAncestorScope(nodeId);
+        const contextChunks = await this.ragService.retrieveContext(node.name, scope, 10);
         const contextText = contextChunks.map(c => c.content).join('\n\n');
         const prompt = `
       You are an expert dental examiner.
@@ -85,6 +89,7 @@ exports.TestPapersService = TestPapersService;
 exports.TestPapersService = TestPapersService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Inject)(ai_provider_interface_1.AI_PROVIDER)),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, rag_service_1.RagService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, rag_service_1.RagService,
+        syllabus_service_1.SyllabusService])
 ], TestPapersService);
 //# sourceMappingURL=test-papers.service.js.map

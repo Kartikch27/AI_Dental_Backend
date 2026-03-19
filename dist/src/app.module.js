@@ -20,6 +20,37 @@ const viva_module_1 = require("./modules/viva/viva.module");
 const pdf_module_1 = require("./modules/pdf/pdf.module");
 const bullmq_1 = require("@nestjs/bullmq");
 const rag_module_1 = require("./modules/rag/rag.module");
+function getRedisConnection() {
+    if (process.env.REDIS_URL) {
+        try {
+            const u = new URL(process.env.REDIS_URL);
+            const dbFromPath = u.pathname?.replace('/', '');
+            const db = dbFromPath ? Number.parseInt(dbFromPath, 10) : undefined;
+            return {
+                host: u.hostname,
+                port: u.port ? Number.parseInt(u.port, 10) : 6379,
+                username: u.username || undefined,
+                password: u.password || undefined,
+                db: Number.isFinite(db) ? db : undefined,
+                ...(u.protocol === 'rediss:' ? { tls: {} } : {}),
+            };
+        }
+        catch {
+            return null;
+        }
+    }
+    if (process.env.REDIS_HOST) {
+        return {
+            host: process.env.REDIS_HOST,
+            port: Number.parseInt(process.env.REDIS_PORT || '6379', 10),
+        };
+    }
+    return null;
+}
+const redisConnection = getRedisConnection();
+const enableRagQueue = process.env.ENABLE_RAG_QUEUE === 'true' ||
+    process.env.ENABLE_QUEUES === 'true' ||
+    process.env.ENABLE_BULLMQ === 'true';
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,13 +65,14 @@ exports.AppModule = AppModule = __decorate([
             test_papers_module_1.TestPapersModule,
             viva_module_1.VivaModule,
             pdf_module_1.PdfModule,
-            bullmq_1.BullModule.forRoot({
-                connection: {
-                    host: process.env.REDIS_HOST || 'localhost',
-                    port: parseInt(process.env.REDIS_PORT || '6379'),
-                },
-            }),
-            rag_module_1.RagModule,
+            ...(enableRagQueue && redisConnection
+                ? [
+                    bullmq_1.BullModule.forRoot({
+                        connection: redisConnection,
+                    }),
+                    rag_module_1.RagModule,
+                ]
+                : []),
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

@@ -1,9 +1,31 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+require("dotenv/config");
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const swagger_1 = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
+function normalizeDatabaseUrl(raw) {
+    try {
+        const url = new URL(raw);
+        const isNeonPooler = url.hostname.includes('-pooler.');
+        if (isNeonPooler)
+            url.searchParams.set('pgbouncer', 'true');
+        url.searchParams.delete('channel_binding');
+        if (!url.searchParams.get('sslmode'))
+            url.searchParams.set('sslmode', 'require');
+        return url.toString();
+    }
+    catch {
+        return raw;
+    }
+}
+if (!process.env.DATABASE_URL && process.env.DIRECT_URL) {
+    process.env.DATABASE_URL = process.env.DIRECT_URL;
+}
+if (process.env.DATABASE_URL) {
+    process.env.DATABASE_URL = normalizeDatabaseUrl(process.env.DATABASE_URL);
+}
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors();

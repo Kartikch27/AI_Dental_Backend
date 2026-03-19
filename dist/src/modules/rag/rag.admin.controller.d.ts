@@ -1,17 +1,61 @@
 import { RagService } from './rag.service.js';
 import { IngestionService } from './ingestion/ingestion.service.js';
+import { ChapterDetectionService } from './ingestion/chapter-detection.service.js';
+import { PdfRendererService } from './ingestion/pdf-renderer.service.js';
+import { TocVisionService } from './ingestion/toc-vision.service.js';
 export declare class RagAdminController {
     private readonly ragService;
     private readonly ingestionService;
-    constructor(ragService: RagService, ingestionService: IngestionService);
+    private readonly chapterDetectionService;
+    private readonly pdfRenderer;
+    private readonly tocVision;
+    constructor(ragService: RagService, ingestionService: IngestionService, chapterDetectionService: ChapterDetectionService, pdfRenderer: PdfRendererService, tocVision: TocVisionService);
+    previewChapters(file: any): Promise<{
+        strategy: string;
+        pdfType: string;
+        pageCount: number;
+        tocPagesUsed: number[];
+        sectionCount: number;
+        chapterCount: number;
+        sections: {
+            title: string;
+            chapters: {
+                number: number;
+                title: string;
+                page: number;
+            }[];
+        }[];
+        totalCharsDetected?: undefined;
+        chapters?: undefined;
+    } | {
+        strategy: string;
+        pdfType: string;
+        pageCount: number;
+        totalCharsDetected: number;
+        chapterCount: number;
+        chapters: {
+            index: number;
+            title: string;
+            headingRaw: string;
+            contentChars: number;
+            contentPreview: string;
+        }[];
+        tocPagesUsed?: undefined;
+        sectionCount?: undefined;
+        sections?: undefined;
+    }>;
+    debugPdfText(file: any): Promise<{
+        totalChars: number;
+        totalLines: number;
+        first100Lines: string[];
+        rawFirst4000: string;
+    }>;
     ingest(body: {
         title: string;
         content: string;
         metadata: any;
     }): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -26,12 +70,12 @@ export declare class RagAdminController {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         nodeId: string | null;
     }>;
     ingestFile(file: any, title: string, metadataStr: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -46,6 +90,8 @@ export declare class RagAdminController {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         nodeId: string | null;
     }>;
     retryIngestion(id: string): Promise<{
@@ -53,20 +99,18 @@ export declare class RagAdminController {
     }>;
     listDocuments(): Promise<any>;
     getDocumentById(id: string): Promise<{
-        _count: {
-            chunks: number;
-        };
         node: {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            orderIndex: number;
             parentId: string | null;
+            orderIndex: number;
         } | null;
+        _count: {
+            chunks: number;
+        };
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         sourceType: string;
         inputMethod: string;
@@ -81,6 +125,8 @@ export declare class RagAdminController {
         ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         nodeId: string | null;
     }>;
     getChunks(id: string): Promise<any>;

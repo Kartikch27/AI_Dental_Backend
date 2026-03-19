@@ -12,12 +12,13 @@ const notes_service_1 = require("./notes.service");
 const notes_controller_1 = require("./notes.controller");
 const ai_module_1 = require("../ai/ai.module");
 const rag_module_1 = require("../rag/rag.module");
+const syllabus_module_1 = require("../syllabus/syllabus.module");
 let NotesModule = class NotesModule {
 };
 exports.NotesModule = NotesModule;
 exports.NotesModule = NotesModule = __decorate([
     (0, common_1.Module)({
-        imports: [ai_module_1.AIModule, rag_module_1.RagModule],
+        imports: [ai_module_1.AIModule, rag_module_1.RagModule, syllabus_module_1.SyllabusModule],
         providers: [notes_service_1.NotesService],
         controllers: [notes_controller_1.NotesController],
     })

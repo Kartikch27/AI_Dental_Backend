@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AI_PROVIDER } from '../ai/ai.provider.interface';
 import type { AIProvider } from '../ai/ai.provider.interface';
 import { RagService } from '../rag/rag.service';
+import { SyllabusService } from '../syllabus/syllabus.service';
 
 @Injectable()
 export class TestPapersService {
@@ -10,14 +11,17 @@ export class TestPapersService {
     private prisma: PrismaService,
     @Inject(AI_PROVIDER) private ai: AIProvider,
     private ragService: RagService,
+    private syllabusService: SyllabusService,
   ) {}
 
   async generateTest(userId: string, nodeId: string, config: any) {
     const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
     if (!node) throw new Error('Node not found');
 
+    const scope = await this.syllabusService.resolveAncestorScope(nodeId);
+
     // Step 1: Retrieve RAG context (higher limit for test papers)
-    const contextChunks = await this.ragService.retrieveContext(node.name, { nodeId }, 10);
+    const contextChunks = await this.ragService.retrieveContext(node.name, scope, 10);
     const contextText = contextChunks.map(c => c.content).join('\n\n');
 
     // Step 2: Build grounded prompt

@@ -1,0 +1,267 @@
+{
+  "info": {
+    "name": "AI Dental Backend API",
+    "description": "Postman collection for the AI Dental Exam API (NestJS).\\n\\nNotes:\\n- Global prefix is /api/v1, so set {{baseUrl}} like: http://localhost:3001/api/v1\\n- Run Auth -> Login first (it stores JWT into {{token}}).\\n- Admin/RAG routes require an ADMIN JWT in {{adminToken}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api/v1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "adminToken", "value": "", "type": "string" },
+    { "key": "syllabusNodeId", "value": "", "type": "string" },
+    { "key": "vivaSessionId", "value": "", "type": "string" },
+    { "key": "ragDocumentId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Misc",
+      "item": [
+        {
+          "name": "Health / Hello",
+          "request": { "method": "GET", "url": "{{baseUrl}}" }
+        },
+        {
+          "name": "Swagger UI",
+          "request": { "method": "GET", "url": "{{baseUrl}}/docs" }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Student)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"student@example.com\",\\n  \"password\": \"Password@123\",\\n  \"fullName\": \"Student One\"\\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login (stores token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.access_token) {",
+                  "    pm.collectionVariables.set('token', json.access_token);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"email\": \"student@example.com\",\\n  \"password\": \"Password@123\",\\n  \"role\": \"STUDENT\"\\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Syllabus",
+      "item": [
+        { "name": "Get Roots", "request": { "method": "GET", "url": "{{baseUrl}}/syllabus/roots" } },
+        { "name": "Get Children (by node id)", "request": { "method": "GET", "url": "{{baseUrl}}/syllabus/{{syllabusNodeId}}/children" } }
+      ]
+    },
+    {
+      "name": "Notes",
+      "item": [
+        {
+          "name": "Generate Notes",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\\n  \"nodeId\": \"{{syllabusNodeId}}\",\\n  \"style\": \"EXAM_NOTES\"\\n}" },
+            "url": "{{baseUrl}}/notes/generate"
+          }
+        },
+        {
+          "name": "Notes History",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/notes/history"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Papers",
+      "item": [
+        {
+          "name": "Generate Test Paper",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"nodeId\": \"{{syllabusNodeId}}\",\\n  \"config\": {\\n    \"mcqCount\": 10,\\n    \"saqCount\": 5,\\n    \"laqCount\": 2,\\n    \"caseCount\": 1\\n  }\\n}"
+            },
+            "url": "{{baseUrl}}/test-papers/generate"
+          }
+        },
+        {
+          "name": "Test Papers History",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/test-papers/history"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Viva",
+      "item": [
+        {
+          "name": "Start Viva Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "try {",
+                  "  const json = pm.response.json();",
+                  "  if (json && json.session && json.session.id) {",
+                  "    pm.collectionVariables.set('vivaSessionId', json.session.id);",
+                  "  }",
+                  "} catch (e) {}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\\n  \"nodeId\": \"{{syllabusNodeId}}\"\\n}" },
+            "url": "{{baseUrl}}/viva/start"
+          }
+        },
+        {
+          "name": "Submit Answer",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\\n  \"sessionId\": \"{{vivaSessionId}}\",\\n  \"answer\": \"It is inflammation of the pulp tissue...\"\\n}" },
+            "url": "{{baseUrl}}/viva/answer"
+          }
+        },
+        {
+          "name": "Get Session History",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/viva/session/{{vivaSessionId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PDF",
+      "item": [
+        {
+          "name": "Export PDF",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/pdf" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"title\": \"Periodontology - Quick Revision\",\\n  \"content\": \"This is sample content to export as a PDF.\\n\\n- Point 1\\n- Point 2\\n\"\\n}"
+            },
+            "url": "{{baseUrl}}/pdf/export"
+          }
+        }
+      ]
+    },
+    {
+      "name": "RAG (Student)",
+      "item": [
+        {
+          "name": "Generate (Streaming SSE)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "text/event-stream" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"query\": \"Explain acute pulpitis in simple terms.\",\\n  \"scope\": {\\n    \"nodeId\": \"{{syllabusNodeId}}\"\\n  },\\n  \"history\": []\\n}"
+            },
+            "url": "{{baseUrl}}/rag/generate"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin / RAG",
+      "description": "Requires ADMIN JWT in {{adminToken}}.\\n\\nTo enable ingestion queue, set ENABLE_RAG_QUEUE=true and configure Redis (REDIS_URL or REDIS_HOST/REDIS_PORT).",
+      "item": [
+        {
+          "name": "Ingest Text Document",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\\n  \"title\": \"Caries - Lecture Notes\",\\n  \"content\": \"Dental caries is a biofilm-mediated disease...\",\\n  \"metadata\": {\\n    \"sourceType\": \"notes\",\\n    \"nodeId\": \"{{syllabusNodeId}}\"\\n  }\\n}"
+            },
+            "url": "{{baseUrl}}/admin/rag/ingest"
+          }
+        },
+        {
+          "name": "Ingest PDF Document (multipart/form-data)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] },
+                { "key": "title", "type": "text", "value": "Endodontics - PDF" },
+                {
+                  "key": "metadata",
+                  "type": "text",
+                  "value": "{\\n  \\\"sourceType\\\": \\\"upload\\\",\\n  \\\"nodeId\\\": \\\"{{syllabusNodeId}}\\\"\\n}"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/admin/rag/ingest-file"
+          }
+        },
+        { "name": "List Documents", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/admin/rag/documents" } },
+        { "name": "Get Document by ID", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/admin/rag/documents/{{ragDocumentId}}" } },
+        { "name": "Get Document Chunks", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "GET", "url": "{{baseUrl}}/admin/rag/documents/{{ragDocumentId}}/chunks" } },
+        { "name": "Retry Ingestion", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "POST", "url": "{{baseUrl}}/admin/rag/documents/{{ragDocumentId}}/retry" } },
+        { "name": "Delete Document", "request": { "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] }, "method": "DELETE", "url": "{{baseUrl}}/admin/rag/documents/{{ragDocumentId}}" } }
+      ]
+    }
+  ]
+}
+

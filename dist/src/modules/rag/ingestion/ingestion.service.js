@@ -51,28 +51,49 @@ const common_1 = require("@nestjs/common");
 const bullmq_1 = require("@nestjs/bullmq");
 const bullmq_2 = require("bullmq");
 const prisma_service_1 = require("../../../prisma/prisma.service");
+const syllabus_service_1 = require("../../syllabus/syllabus.service");
 const client_1 = require("@prisma/client");
 const fs = __importStar(require("fs/promises"));
 const path = __importStar(require("path"));
 let IngestionService = IngestionService_1 = class IngestionService {
-    ingestionQueue;
     prisma;
+    syllabusService;
+    ingestionQueue;
     logger = new common_1.Logger(IngestionService_1.name);
-    constructor(ingestionQueue, prisma) {
-        this.ingestionQueue = ingestionQueue;
+    constructor(prisma, syllabusService, ingestionQueue) {
         this.prisma = prisma;
+        this.syllabusService = syllabusService;
+        this.ingestionQueue = ingestionQueue;
+    }
+    async resolveScope(metadata) {
+        const nodeId = metadata.nodeId;
+        if (!nodeId)
+            return metadata;
+        const auto = await this.syllabusService.resolveAncestorScope(nodeId);
+        return {
+            ...metadata,
+            nodeId,
+            yearId: metadata.yearId ?? auto.yearId,
+            subjectId: metadata.subjectId ?? auto.subjectId,
+            chapterId: metadata.chapterId ?? auto.chapterId,
+            conceptId: metadata.conceptId ?? auto.conceptId,
+        };
     }
     async processDocument(title, content, metadata) {
+        if (!this.ingestionQueue) {
+            throw new Error('RAG ingestion queue is disabled. Set ENABLE_RAG_QUEUE=true and configure REDIS_URL (or REDIS_HOST/REDIS_PORT) to enable ingestion.');
+        }
+        const resolved = await this.resolveScope(metadata);
         const document = await this.prisma.ragDocument.create({
             data: {
                 title,
-                sourceType: metadata.sourceType || 'notes',
+                sourceType: resolved.sourceType || 'notes',
                 inputMethod: 'text',
-                yearId: metadata.yearId,
-                subjectId: metadata.subjectId,
-                chapterId: metadata.chapterId,
-                conceptId: metadata.conceptId,
-                nodeId: metadata.nodeId,
+                yearId: resolved.yearId,
+                subjectId: resolved.subjectId,
+                chapterId: resolved.chapterId,
+                conceptId: resolved.conceptId,
+                nodeId: resolved.nodeId,
                 status: 'active',
                 ingestionStatus: client_1.IngestionStatus.PROCESSING,
             },
@@ -80,27 +101,31 @@ let IngestionService = IngestionService_1 = class IngestionService {
         await this.ingestionQueue.add('process-content', {
             documentId: document.id,
             content,
-            metadata,
+            metadata: resolved,
         });
         return document;
     }
     async processFile(title, file, metadata) {
+        if (!this.ingestionQueue) {
+            throw new Error('RAG ingestion queue is disabled. Set ENABLE_RAG_QUEUE=true and configure REDIS_URL (or REDIS_HOST/REDIS_PORT) to enable ingestion.');
+        }
+        const resolved = await this.resolveScope(metadata);
         const filename = `${Date.now()}-${file.originalname}`;
         const uploadPath = path.join(process.cwd(), 'uploads/rag', filename);
         await fs.writeFile(uploadPath, file.buffer);
         const document = await this.prisma.ragDocument.create({
             data: {
                 title,
-                sourceType: metadata.sourceType || 'notes',
+                sourceType: resolved.sourceType || 'notes',
                 inputMethod: 'upload',
                 fileUrl: uploadPath,
                 fileName: file.originalname,
                 mimeType: file.mimetype,
-                yearId: metadata.yearId,
-                subjectId: metadata.subjectId,
-                chapterId: metadata.chapterId,
-                conceptId: metadata.conceptId,
-                nodeId: metadata.nodeId,
+                yearId: resolved.yearId,
+                subjectId: resolved.subjectId,
+                chapterId: resolved.chapterId,
+                conceptId: resolved.conceptId,
+                nodeId: resolved.nodeId,
                 status: 'active',
                 ingestionStatus: client_1.IngestionStatus.PENDING,
             },
@@ -108,33 +133,32 @@ let IngestionService = IngestionService_1 = class IngestionService {
         await this.ingestionQueue.add('process-file', {
             documentId: document.id,
             filePath: uploadPath,
-            metadata,
+            metadata: resolved,
         });
         return document;
     }
     async retryIngestion(documentId) {
+        if (!this.ingestionQueue) {
+            throw new Error('RAG ingestion queue is disabled. Set ENABLE_RAG_QUEUE=true and configure REDIS_URL (or REDIS_HOST/REDIS_PORT) to enable ingestion.');
+        }
         const document = await this.prisma.ragDocument.findUnique({
-            where: { id: documentId }
+            where: { id: documentId },
         });
-        if (!document) {
-            throw new Error("Document not found");
-        }
-        if (document.ingestionStatus !== client_1.IngestionStatus.FAILED) {
-            throw new Error("Only failed documents can be retried");
-        }
+        if (!document)
+            throw new Error('Document not found');
+        if (document.ingestionStatus !== client_1.IngestionStatus.FAILED)
+            throw new Error('Only failed documents can be retried');
         await this.prisma.$transaction([
-            this.prisma.ragChunk.deleteMany({
-                where: { documentId: document.id }
-            }),
+            this.prisma.ragChunk.deleteMany({ where: { documentId: document.id } }),
             this.prisma.ragDocument.update({
                 where: { id: documentId },
                 data: {
                     ingestionStatus: client_1.IngestionStatus.PENDING,
                     failureReason: null,
                     processedAt: null,
-                    status: 'active'
-                }
-            })
+                    status: 'active',
+                },
+            }),
         ]);
         if (document.inputMethod === 'upload' && document.fileUrl) {
             await this.ingestionQueue.add('process-file', {
@@ -151,16 +175,18 @@ let IngestionService = IngestionService_1 = class IngestionService {
             });
         }
         else {
-            throw new Error("Retrying text-based ingestion requires re-pasting the text. Please delete and re-ingest.");
+            throw new Error('Retrying text-based ingestion requires re-pasting the text. Please delete and re-ingest.');
         }
-        return { message: "Ingestion retried successfully" };
+        return { message: 'Ingestion retried successfully' };
     }
 };
 exports.IngestionService = IngestionService;
 exports.IngestionService = IngestionService = IngestionService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __param(0, (0, bullmq_1.InjectQueue)('ingestion')),
-    __metadata("design:paramtypes", [bullmq_2.Queue,
-        prisma_service_1.PrismaService])
+    __param(2, (0, common_1.Optional)()),
+    __param(2, (0, bullmq_1.InjectQueue)('ingestion')),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        syllabus_service_1.SyllabusService,
+        bullmq_2.Queue])
 ], IngestionService);
 //# sourceMappingURL=ingestion.service.js.map

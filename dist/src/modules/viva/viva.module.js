@@ -12,12 +12,13 @@ const viva_service_1 = require("./viva.service");
 const viva_controller_1 = require("./viva.controller");
 const ai_module_1 = require("../ai/ai.module");
 const rag_module_1 = require("../rag/rag.module");
+const syllabus_module_1 = require("../syllabus/syllabus.module");
 let VivaModule = class VivaModule {
 };
 exports.VivaModule = VivaModule;
 exports.VivaModule = VivaModule = __decorate([
     (0, common_1.Module)({
-        imports: [ai_module_1.AIModule, rag_module_1.RagModule],
+        imports: [ai_module_1.AIModule, rag_module_1.RagModule, syllabus_module_1.SyllabusModule],
         providers: [viva_service_1.VivaService],
         controllers: [viva_controller_1.VivaController],
     })

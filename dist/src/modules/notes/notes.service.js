@@ -17,21 +17,39 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const ai_provider_interface_1 = require("../ai/ai.provider.interface");
 const rag_service_1 = require("../rag/rag.service");
+const syllabus_service_1 = require("../syllabus/syllabus.service");
 let NotesService = class NotesService {
     prisma;
     ai;
     ragService;
-    constructor(prisma, ai, ragService) {
+    syllabusService;
+    constructor(prisma, ai, ragService, syllabusService) {
         this.prisma = prisma;
         this.ai = ai;
         this.ragService = ragService;
+        this.syllabusService = syllabusService;
     }
     async generateNotes(userId, nodeId, style) {
         const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
         if (!node)
             throw new Error('Node not found');
-        const contextChunks = await this.ragService.retrieveContext(node.name, { nodeId });
-        const contextText = contextChunks.map(c => c.content).join('\n\n');
+        const scope = await this.syllabusService.resolveAncestorScope(nodeId);
+        const maxSources = Number.parseInt(process.env.RAG_MAX_SOURCES || '4', 10);
+        const maxSourceChars = Number.parseInt(process.env.RAG_SOURCE_MAX_CHARS || '900', 10);
+        const maxContextChars = Number.parseInt(process.env.RAG_CONTEXT_MAX_CHARS || '3600', 10);
+        const contextChunks = await this.ragService.retrieveContext(node.name, scope, maxSources);
+        let used = 0;
+        const parts = [];
+        for (let i = 0; i < contextChunks.length; i++) {
+            const raw = String(contextChunks[i].content || '');
+            const clipped = raw.length > maxSourceChars ? raw.slice(0, maxSourceChars) : raw;
+            const block = `[Source ${i + 1}]\n${clipped}`;
+            if (used + block.length > maxContextChars)
+                break;
+            parts.push(block);
+            used += block.length;
+        }
+        const contextText = parts.join('\n\n');
         const prompt = `
       You are an expert dental educator.
       Use the following approved educational context to generate ${style} for the topic: ${node.name}.
@@ -78,6 +96,7 @@ exports.NotesService = NotesService;
 exports.NotesService = NotesService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Inject)(ai_provider_interface_1.AI_PROVIDER)),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, rag_service_1.RagService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, rag_service_1.RagService,
+        syllabus_service_1.SyllabusService])
 ], NotesService);
 //# sourceMappingURL=notes.service.js.map

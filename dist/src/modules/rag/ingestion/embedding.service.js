@@ -14,20 +14,74 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmbeddingService = void 0;
 const common_1 = require("@nestjs/common");
+const genai_1 = require("@google/genai");
 const openai_1 = __importDefault(require("openai"));
 let EmbeddingService = class EmbeddingService {
+    genai;
     openai;
+    provider;
     constructor() {
-        this.openai = new openai_1.default({
-            apiKey: process.env.OPENAI_API_KEY,
-        });
+        if (process.env.GEMINI_API_KEY) {
+            this.provider = 'gemini';
+            this.genai = new genai_1.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+            this.openai = null;
+            return;
+        }
+        if (process.env.OPENAI_API_KEY) {
+            this.provider = 'openai';
+            this.openai = new openai_1.default({ apiKey: process.env.OPENAI_API_KEY });
+            this.genai = null;
+            return;
+        }
+        this.provider = 'gemini';
+        this.genai = null;
+        this.openai = null;
     }
-    async generateEmbedding(text) {
-        const response = await this.openai.embeddings.create({
-            model: 'text-embedding-3-small',
-            input: text.replace(/\n/g, ' '),
+    async generateEmbeddingBatch(texts, concurrency = 3) {
+        const results = new Array(texts.length);
+        for (let i = 0; i < texts.length; i += concurrency) {
+            const slice = texts.slice(i, i + concurrency);
+            const embeddings = await Promise.all(slice.map((t) => this.generateEmbedding(t)));
+            embeddings.forEach((emb, j) => { results[i + j] = emb; });
+        }
+        return results;
+    }
+    async generateEmbedding(text, attempt = 0) {
+        const input = text.replace(/\n/g, ' ');
+        if (this.provider === 'gemini') {
+            if (!this.genai) {
+                throw new common_1.ServiceUnavailableException('Embedding provider GEMINI is selected but GEMINI_API_KEY is not set.');
+            }
+            try {
+                const response = await this.genai.models.embedContent({
+                    model: 'gemini-embedding-001',
+                    contents: input,
+                });
+                return response.embeddings[0].values;
+            }
+            catch (err) {
+                const is429 = err?.status === 429 || err?.message?.includes('429') || err?.message?.includes('RESOURCE_EXHAUSTED');
+                if (is429 && attempt < 6) {
+                    const delay = Math.min(4000 * Math.pow(2, attempt), 120_000);
+                    await new Promise((r) => setTimeout(r, delay));
+                    return this.generateEmbedding(text, attempt + 1);
+                }
+                throw err;
+            }
+        }
+        if (!this.openai) {
+            throw new common_1.ServiceUnavailableException('Embedding provider OPENAI is selected but OPENAI_API_KEY is not set.');
+        }
+        const model = process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-large';
+        const resp = await this.openai.embeddings.create({
+            model,
+            input,
         });
-        return response.data[0].embedding;
+        const vec = resp.data?.[0]?.embedding;
+        if (!vec || !Array.isArray(vec)) {
+            throw new common_1.ServiceUnavailableException('OpenAI embeddings returned empty vector');
+        }
+        return vec;
     }
 };
 exports.EmbeddingService = EmbeddingService;

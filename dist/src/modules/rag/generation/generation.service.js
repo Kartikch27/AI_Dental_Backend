@@ -13,25 +13,37 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GenerationService = void 0;
 const common_1 = require("@nestjs/common");
 const retrieval_service_1 = require("../retrieval/retrieval.service");
-const openai_1 = require("openai");
+const genai_1 = require("@google/genai");
 let GenerationService = GenerationService_1 = class GenerationService {
     retrievalService;
     logger = new common_1.Logger(GenerationService_1.name);
-    openai;
+    genai;
     constructor(retrievalService) {
         this.retrievalService = retrievalService;
-        this.openai = new openai_1.OpenAI({
-            apiKey: process.env.OPENAI_API_KEY,
+        this.genai = new genai_1.GoogleGenAI({
+            apiKey: process.env.GEMINI_API_KEY,
         });
     }
     async generateResponse(query, scope = {}, history = []) {
         this.logger.log(`Retrieving context for query: "${query}"`);
-        const chunks = await this.retrievalService.retrieveRelevantChunks(query, scope, 5);
+        const maxSources = Number.parseInt(process.env.RAG_MAX_SOURCES || '5', 10);
+        const maxSourceChars = Number.parseInt(process.env.RAG_SOURCE_MAX_CHARS || '1200', 10);
+        const maxContextChars = Number.parseInt(process.env.RAG_CONTEXT_MAX_CHARS || '6000', 10);
+        const chunks = await this.retrievalService.retrieveRelevantChunks(query, scope, maxSources);
         let contextText = '';
         if (chunks && chunks.length > 0) {
-            contextText = chunks.map((chunk, index) => {
-                return `[Source ${index + 1}]:\n${chunk.content}`;
-            }).join('\n\n');
+            let used = 0;
+            const parts = [];
+            for (let i = 0; i < chunks.length; i++) {
+                const raw = String(chunks[i].content || '');
+                const clipped = raw.length > maxSourceChars ? raw.slice(0, maxSourceChars) : raw;
+                const block = `[Source ${i + 1}]:\n${clipped}`;
+                if (used + block.length > maxContextChars)
+                    break;
+                parts.push(block);
+                used += block.length;
+            }
+            contextText = parts.join('\n\n');
         }
         const systemPrompt = `You are a helpful AI assistant for dental students, helping them study from their course materials.
 Your goal is to answer the user's question based strictly on the provided context materials.
@@ -40,18 +52,22 @@ Always cite your sources using the [Source X] format when using information from
 
 CONTEXT MATERIALS:
 ${contextText ? contextText : 'No specific context found.'}`;
-        const messages = [
-            { role: 'system', content: systemPrompt },
-            ...history,
-            { role: 'user', content: query }
-        ];
-        this.logger.log(`Generating response using model...`);
+        const geminiHistory = history.map(msg => ({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content }],
+        }));
+        this.logger.log(`Generating response using Gemini...`);
         try {
-            const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: messages,
-                temperature: 0.3,
-                stream: true,
+            const response = await this.genai.models.generateContentStream({
+                model: 'gemini-2.0-flash',
+                config: {
+                    systemInstruction: systemPrompt,
+                    temperature: 0.3,
+                },
+                contents: [
+                    ...geminiHistory,
+                    { role: 'user', parts: [{ text: query }] },
+                ],
             });
             return response;
         }

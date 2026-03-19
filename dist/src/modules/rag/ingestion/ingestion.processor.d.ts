@@ -1,13 +1,37 @@
 import { WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { SyllabusService } from '../../syllabus/syllabus.service';
 import { ChunkingService } from './chunking.service';
 import { EmbeddingService } from './embedding.service';
+import { ChapterDetectionService } from './chapter-detection.service';
+import { PdfRendererService } from './pdf-renderer.service';
+import { TocVisionService } from './toc-vision.service';
+import { OcrService } from './ocr.service';
 export declare class IngestionProcessor extends WorkerHost {
     private prisma;
+    private syllabusService;
     private chunkingService;
     private embeddingService;
+    private chapterDetectionService;
+    private pdfRenderer;
+    private tocVision;
+    private ocrService;
     private readonly logger;
-    constructor(prisma: PrismaService, chunkingService: ChunkingService, embeddingService: EmbeddingService);
+    constructor(prisma: PrismaService, syllabusService: SyllabusService, chunkingService: ChunkingService, embeddingService: EmbeddingService, chapterDetectionService: ChapterDetectionService, pdfRenderer: PdfRendererService, tocVision: TocVisionService, ocrService: OcrService);
     process(job: Job<any>): Promise<any>;
+    private ingestWithChapterDetection;
+    private ingestFlat;
+    private ingestChapterContent;
+    private insertChunkWithEmbedding;
+    private insertChunk;
+    private resolveChildType;
+    private findOrCreateNode;
+    private extractText;
+    private extractTextFromBuffer;
+    private runScannedPipeline;
+    private _pendingTocResult;
+    private ocrChaptersByPageRange;
+    private buildChaptersFromVisionToc;
+    private estimatePageOffset;
 }

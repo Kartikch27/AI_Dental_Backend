@@ -26,14 +26,26 @@ export class GenerationService {
   ) {
     this.logger.log(`Retrieving context for query: "${query}"`);
     
-    // Retrieve top 5 most relevant chunks
-    const chunks = await this.retrievalService.retrieveRelevantChunks(query, scope, 5);
+    const maxSources = Number.parseInt(process.env.RAG_MAX_SOURCES || '5', 10);
+    const maxSourceChars = Number.parseInt(process.env.RAG_SOURCE_MAX_CHARS || '1200', 10);
+    const maxContextChars = Number.parseInt(process.env.RAG_CONTEXT_MAX_CHARS || '6000', 10);
+
+    // Retrieve relevant chunks (selection happens in retrieval pipeline)
+    const chunks = await this.retrievalService.retrieveRelevantChunks(query, scope, maxSources);
     
     let contextText = '';
     if (chunks && chunks.length > 0) {
-      contextText = chunks.map((chunk, index) => {
-        return `[Source ${index + 1}]:\n${chunk.content}`;
-      }).join('\n\n');
+      let used = 0;
+      const parts: string[] = [];
+      for (let i = 0; i < chunks.length; i++) {
+        const raw = String(chunks[i].content || '');
+        const clipped = raw.length > maxSourceChars ? raw.slice(0, maxSourceChars) : raw;
+        const block = `[Source ${i + 1}]:\n${clipped}`;
+        if (used + block.length > maxContextChars) break;
+        parts.push(block);
+        used += block.length;
+      }
+      contextText = parts.join('\n\n');
     }
 
     const systemPrompt = `You are a helpful AI assistant for dental students, helping them study from their course materials.

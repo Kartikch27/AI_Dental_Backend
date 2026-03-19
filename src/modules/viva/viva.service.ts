@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AI_PROVIDER } from '../ai/ai.provider.interface';
 import type { AIProvider } from '../ai/ai.provider.interface';
 import { RagService } from '../rag/rag.service';
+import { SyllabusService } from '../syllabus/syllabus.service';
 
 @Injectable()
 export class VivaService {
@@ -10,11 +11,14 @@ export class VivaService {
     private prisma: PrismaService,
     @Inject(AI_PROVIDER) private ai: AIProvider,
     private ragService: RagService,
+    private syllabusService: SyllabusService,
   ) {}
 
   async startSession(userId: string, nodeId: string) {
     const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
     if (!node) throw new Error('Node not found');
+
+    const scope = await this.syllabusService.resolveAncestorScope(nodeId);
 
     const session = await this.prisma.vivaSession.create({
       data: {
@@ -25,7 +29,7 @@ export class VivaService {
     });
 
     // Step 1: Retrieve RAG context for initial question
-    const contextChunks = await this.ragService.retrieveContext(`Introduction and basic questions about ${node.name}`, { nodeId });
+    const contextChunks = await this.ragService.retrieveContext(`Introduction and basic questions about ${node.name}`, scope);
     const contextText = contextChunks.map(c => c.content).join('\n\n');
 
     // Step 2: Generate first question grounded in RAG
@@ -82,8 +86,9 @@ export class VivaService {
       }
     });
 
-    // Step 1: Retrieve context for the current answer/state
-    const contextChunks = await this.ragService.retrieveContext(`${session.node.name}: ${answer}`, { nodeId: session.nodeId });
+    // Step 1: Retrieve context for the current answer/state (resolve full scope)
+    const scope = await this.syllabusService.resolveAncestorScope(session.nodeId);
+    const contextChunks = await this.ragService.retrieveContext(`${session.node.name}: ${answer}`, scope);
     const contextText = contextChunks.map(c => c.content).join('\n\n');
 
     // Step 2: Evaluate and get next question

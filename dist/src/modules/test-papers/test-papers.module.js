@@ -12,12 +12,13 @@ const test_papers_service_1 = require("./test-papers.service");
 const test_papers_controller_1 = require("./test-papers.controller");
 const ai_module_1 = require("../ai/ai.module");
 const rag_module_1 = require("../rag/rag.module");
+const syllabus_module_1 = require("../syllabus/syllabus.module");
 let TestPapersModule = class TestPapersModule {
 };
 exports.TestPapersModule = TestPapersModule;
 exports.TestPapersModule = TestPapersModule = __decorate([
     (0, common_1.Module)({
-        imports: [ai_module_1.AIModule, rag_module_1.RagModule],
+        imports: [ai_module_1.AIModule, rag_module_1.RagModule, syllabus_module_1.SyllabusModule],
         providers: [test_papers_service_1.TestPapersService],
         controllers: [test_papers_controller_1.TestPapersController],
     })

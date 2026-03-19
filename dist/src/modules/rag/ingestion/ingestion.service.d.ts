@@ -1,10 +1,13 @@
 import { Queue } from 'bullmq';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { SyllabusService } from '../../syllabus/syllabus.service';
 export declare class IngestionService {
-    private ingestionQueue;
     private prisma;
+    private syllabusService;
+    private ingestionQueue?;
     private readonly logger;
-    constructor(ingestionQueue: Queue, prisma: PrismaService);
+    constructor(prisma: PrismaService, syllabusService: SyllabusService, ingestionQueue?: Queue | undefined);
+    private resolveScope;
     processDocument(title: string, content: string, metadata: any): Promise<{
         id: string;
         createdAt: Date;

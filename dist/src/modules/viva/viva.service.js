@@ -17,19 +17,23 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const ai_provider_interface_1 = require("../ai/ai.provider.interface");
 const rag_service_1 = require("../rag/rag.service");
+const syllabus_service_1 = require("../syllabus/syllabus.service");
 let VivaService = class VivaService {
     prisma;
     ai;
     ragService;
-    constructor(prisma, ai, ragService) {
+    syllabusService;
+    constructor(prisma, ai, ragService, syllabusService) {
         this.prisma = prisma;
         this.ai = ai;
         this.ragService = ragService;
+        this.syllabusService = syllabusService;
     }
     async startSession(userId, nodeId) {
         const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
         if (!node)
             throw new Error('Node not found');
+        const scope = await this.syllabusService.resolveAncestorScope(nodeId);
         const session = await this.prisma.vivaSession.create({
             data: {
                 userId,
@@ -37,7 +41,7 @@ let VivaService = class VivaService {
                 status: 'active',
             }
         });
-        const contextChunks = await this.ragService.retrieveContext(`Introduction and basic questions about ${node.name}`, { nodeId });
+        const contextChunks = await this.ragService.retrieveContext(`Introduction and basic questions about ${node.name}`, scope);
         const contextText = contextChunks.map(c => c.content).join('\n\n');
         const prompt = `
       You are a strict but fair dental examiner.
@@ -85,7 +89,8 @@ let VivaService = class VivaService {
                 text: answer,
             }
         });
-        const contextChunks = await this.ragService.retrieveContext(`${session.node.name}: ${answer}`, { nodeId: session.nodeId });
+        const scope = await this.syllabusService.resolveAncestorScope(session.nodeId);
+        const contextChunks = await this.ragService.retrieveContext(`${session.node.name}: ${answer}`, scope);
         const contextText = contextChunks.map(c => c.content).join('\n\n');
         const prompt = `
       You are a dental examiner.
@@ -137,6 +142,7 @@ exports.VivaService = VivaService;
 exports.VivaService = VivaService = __decorate([
     (0, common_1.Injectable)(),
     __param(1, (0, common_1.Inject)(ai_provider_interface_1.AI_PROVIDER)),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, rag_service_1.RagService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, Object, rag_service_1.RagService,
+        syllabus_service_1.SyllabusService])
 ], VivaService);
 //# sourceMappingURL=viva.service.js.map

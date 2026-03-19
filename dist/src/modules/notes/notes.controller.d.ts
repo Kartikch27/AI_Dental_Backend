@@ -7,8 +7,8 @@ export declare class NotesController {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            orderIndex: number;
             parentId: string | null;
+            orderIndex: number;
         };
     } & {
         id: string;
@@ -23,8 +23,8 @@ export declare class NotesController {
             id: string;
             name: string;
             type: import(".prisma/client").$Enums.NodeType;
-            orderIndex: number;
             parentId: string | null;
+            orderIndex: number;
         };
     } & {
         id: string;
