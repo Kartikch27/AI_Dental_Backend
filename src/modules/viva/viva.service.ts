@@ -143,4 +143,25 @@ export class VivaService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async getUserSessions(userId: string) {
+    return this.prisma.vivaSession.findMany({
+      where: { userId },
+      include: {
+        node: true,
+        messages: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async endSession(sessionId: string) {
+    return this.prisma.vivaSession.update({
+      where: { id: sessionId },
+      data: { status: 'completed' },
+      include: { node: true, messages: true },
+    });
+  }
 }

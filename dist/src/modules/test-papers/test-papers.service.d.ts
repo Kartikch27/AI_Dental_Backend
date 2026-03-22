@@ -8,7 +8,7 @@ export declare class TestPapersService {
     private ragService;
     private syllabusService;
     constructor(prisma: PrismaService, ai: AIProvider, ragService: RagService, syllabusService: SyllabusService);
-    generateTest(userId: string, nodeId: string, config: any): Promise<{
+    generateTest(userId: string, nodeId: string, config?: any): Promise<{
         node: {
             id: string;
             name: string;

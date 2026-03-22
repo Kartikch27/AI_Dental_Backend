@@ -1,4 +1,4 @@
-export type AIProviderId = 'groq' | 'anthropic' | 'gemini' | 'openai' | 'mock';
+export type AIProviderId = 'groq' | 'anthropic' | 'gemini' | 'openai' | 'sarvam' | 'mock';
 
 /**
  * Provider labels (use either the id or the numeric label in .env):
@@ -7,9 +7,10 @@ export type AIProviderId = 'groq' | 'anthropic' | 'gemini' | 'openai' | 'mock';
  * - 2 = gemini
  * - 3 = openai
  * - 4 = mock
+ * - 5 = sarvam
  */
 export const AI_PROVIDER_LABELS: ReadonlyArray<{
-  index: 0 | 1 | 2 | 3 | 4;
+  index: 0 | 1 | 2 | 3 | 4 | 5;
   id: AIProviderId;
   envKey?: string;
 }> = [
@@ -18,6 +19,7 @@ export const AI_PROVIDER_LABELS: ReadonlyArray<{
   { index: 2, id: 'gemini', envKey: 'GEMINI_API_KEY' },
   { index: 3, id: 'openai', envKey: 'OPENAI_API_KEY' },
   { index: 4, id: 'mock' },
+  { index: 5, id: 'sarvam', envKey: 'SARVAM_API_KEY' },
 ] as const;
 
 const PROVIDER_ID_BY_INDEX = new Map<string, AIProviderId>(
@@ -37,6 +39,7 @@ function parseProviderToken(token: string): AIProviderId | null {
     t === 'anthropic' ||
     t === 'gemini' ||
     t === 'openai' ||
+    t === 'sarvam' ||
     t === 'mock'
   ) {
     return t;

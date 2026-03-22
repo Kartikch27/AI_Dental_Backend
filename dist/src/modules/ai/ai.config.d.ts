@@ -1,6 +1,6 @@
-export type AIProviderId = 'groq' | 'anthropic' | 'gemini' | 'openai' | 'mock';
+export type AIProviderId = 'groq' | 'anthropic' | 'gemini' | 'openai' | 'sarvam' | 'mock';
 export declare const AI_PROVIDER_LABELS: ReadonlyArray<{
-    index: 0 | 1 | 2 | 3 | 4;
+    index: 0 | 1 | 2 | 3 | 4 | 5;
     id: AIProviderId;
     envKey?: string;
 }>;

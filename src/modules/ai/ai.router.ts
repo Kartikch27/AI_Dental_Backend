@@ -21,7 +21,7 @@ function isRetryableProviderError(err: unknown): boolean {
 export class AIRouter implements AIProvider {
   constructor(
     private readonly order: AIProviderId[],
-    private readonly providers: Record<AIProviderId, AIProvider>,
+    private readonly providers: Partial<Record<AIProviderId, AIProvider>>,
   ) {}
 
   async generateText(prompt: string, context?: any): Promise<string> {

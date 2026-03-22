@@ -9,6 +9,7 @@ exports.AI_PROVIDER_LABELS = [
     { index: 2, id: 'gemini', envKey: 'GEMINI_API_KEY' },
     { index: 3, id: 'openai', envKey: 'OPENAI_API_KEY' },
     { index: 4, id: 'mock' },
+    { index: 5, id: 'sarvam', envKey: 'SARVAM_API_KEY' },
 ];
 const PROVIDER_ID_BY_INDEX = new Map(exports.AI_PROVIDER_LABELS.map(p => [String(p.index), p.id]));
 function parseProviderToken(token) {
@@ -22,6 +23,7 @@ function parseProviderToken(token) {
         t === 'anthropic' ||
         t === 'gemini' ||
         t === 'openai' ||
+        t === 'sarvam' ||
         t === 'mock') {
         return t;
     }

@@ -17,13 +17,21 @@ const common_1 = require("@nestjs/common");
 const notes_service_1 = require("./notes.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
+const generate_notes_dto_1 = require("./generate-notes.dto");
 let NotesController = class NotesController {
     notesService;
     constructor(notesService) {
         this.notesService = notesService;
     }
     async generate(req, body) {
-        return this.notesService.generateNotes(req.user.userId, body.nodeId, body.style);
+        let style;
+        try {
+            style = (0, generate_notes_dto_1.resolveGenerationType)(body.style);
+        }
+        catch (e) {
+            throw new common_1.BadRequestException(e.message);
+        }
+        return this.notesService.generateNotes(req.user.userId, body.nodeId, style);
     }
     async getHistory(req) {
         return this.notesService.getUserNotes(req.user.userId);

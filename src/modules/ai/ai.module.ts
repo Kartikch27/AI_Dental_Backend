@@ -7,6 +7,7 @@ import { GeminiProvider } from './providers/gemini.provider';
 import { GroqProvider } from './providers/groq.provider';
 import { MockProvider } from './providers/mock.provider';
 import { OpenAIProvider } from './providers/openai.provider';
+import { SarvamProvider } from './providers/sarvam.provider';
 
 @Global()
 @Module({
@@ -15,6 +16,7 @@ import { OpenAIProvider } from './providers/openai.provider';
     OpenAIProvider,
     GroqProvider,
     AnthropicProvider,
+    SarvamProvider,
     MockProvider,
     {
       provide: AI_PROVIDER,
@@ -23,12 +25,13 @@ import { OpenAIProvider } from './providers/openai.provider';
         openai: OpenAIProvider,
         groq: GroqProvider,
         anthropic: AnthropicProvider,
+        sarvam: SarvamProvider,
         mock: MockProvider,
       ) => {
         const order = getAiProviderOrder();
-        return new AIRouter(order, { gemini, openai, groq, anthropic, mock });
+        return new AIRouter(order, { gemini, openai, groq, anthropic, sarvam, mock });
       },
-      inject: [GeminiProvider, OpenAIProvider, GroqProvider, AnthropicProvider, MockProvider],
+      inject: [GeminiProvider, OpenAIProvider, GroqProvider, AnthropicProvider, SarvamProvider, MockProvider],
     },
   ],
   exports: [AI_PROVIDER],

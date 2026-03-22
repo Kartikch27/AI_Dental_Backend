@@ -3,7 +3,7 @@ import type { AIProviderId } from './ai.config';
 export declare class AIRouter implements AIProvider {
     private readonly order;
     private readonly providers;
-    constructor(order: AIProviderId[], providers: Record<AIProviderId, AIProvider>);
+    constructor(order: AIProviderId[], providers: Partial<Record<AIProviderId, AIProvider>>);
     generateText(prompt: string, context?: any): Promise<string>;
     generateStructured(prompt: string, schema: any): Promise<any>;
 }

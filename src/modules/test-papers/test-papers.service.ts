@@ -14,7 +14,7 @@ export class TestPapersService {
     private syllabusService: SyllabusService,
   ) {}
 
-  async generateTest(userId: string, nodeId: string, config: any) {
+  async generateTest(userId: string, nodeId: string, config: any = {}) {
     const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
     if (!node) throw new Error('Node not found');
 

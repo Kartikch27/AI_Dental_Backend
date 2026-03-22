@@ -23,10 +23,28 @@ let PdfController = class PdfController {
         this.pdfService = pdfService;
     }
     async export(body, res) {
-        const buffer = await this.pdfService.generateContentPdf(body.title, body.content);
+        const type = body.type ?? 'notes';
+        const title = body.title ?? 'Study Material';
+        const subtitle = body.subtitle ?? '';
+        let buffer;
+        let filename;
+        if (type === 'viva') {
+            if (!body.messages?.length) {
+                throw new common_1.BadRequestException('messages[] is required for type "viva"');
+            }
+            buffer = await this.pdfService.generateVivaPdf(title, body.messages, subtitle);
+            filename = 'viva_session.pdf';
+        }
+        else {
+            if (!body.content) {
+                throw new common_1.BadRequestException('content is required for notes and test-paper exports');
+            }
+            buffer = await this.pdfService.generateContentPdf(title, body.content, subtitle);
+            filename = type === 'test-paper' ? 'test_paper.pdf' : 'study_notes.pdf';
+        }
         res.set({
             'Content-Type': 'application/pdf',
-            'Content-Disposition': `attachment; filename=dental_study_material.pdf`,
+            'Content-Disposition': `attachment; filename="${filename}"`,
             'Content-Length': buffer.length,
         });
         res.end(buffer);
@@ -35,7 +53,7 @@ let PdfController = class PdfController {
 exports.PdfController = PdfController;
 __decorate([
     (0, common_1.Post)('export'),
-    (0, swagger_1.ApiOperation)({ summary: 'Export content as PDF' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Export notes, test paper, or viva session as a formatted PDF' }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),

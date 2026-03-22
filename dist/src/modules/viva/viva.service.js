@@ -137,6 +137,25 @@ let VivaService = class VivaService {
             orderBy: { createdAt: 'asc' },
         });
     }
+    async getUserSessions(userId) {
+        return this.prisma.vivaSession.findMany({
+            where: { userId },
+            include: {
+                node: true,
+                messages: {
+                    orderBy: { createdAt: 'asc' },
+                },
+            },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+    async endSession(sessionId) {
+        return this.prisma.vivaSession.update({
+            where: { id: sessionId },
+            data: { status: 'completed' },
+            include: { node: true, messages: true },
+        });
+    }
 };
 exports.VivaService = VivaService;
 exports.VivaService = VivaService = __decorate([

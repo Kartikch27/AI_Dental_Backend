@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, BadRequestException } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { resolveGenerationType } from './generate-notes.dto';
 
 @ApiTags('Notes')
 @ApiBearerAuth()
@@ -13,7 +14,13 @@ export class NotesController {
   @Post('generate')
   @ApiOperation({ summary: 'Generate new AI notes' })
   async generate(@Request() req: any, @Body() body: any) {
-    return this.notesService.generateNotes(req.user.userId, body.nodeId, body.style);
+    let style;
+    try {
+      style = resolveGenerationType(body.style);
+    } catch (e: any) {
+      throw new BadRequestException(e.message);
+    }
+    return this.notesService.generateNotes(req.user.userId, body.nodeId, style);
   }
 
   @UseGuards(JwtAuthGuard)

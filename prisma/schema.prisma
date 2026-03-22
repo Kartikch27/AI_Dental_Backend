@@ -26,6 +26,7 @@ enum GenerationType {
   DETAILED_EXPLANATION
   BULLET_REVISION
   TEST_PAPER
+  SUMMARY
 }
 
 model User {

@@ -26,10 +26,17 @@ let VivaController = class VivaController {
         return this.vivaService.startSession(req.user.userId, body.nodeId);
     }
     async answer(body) {
-        return this.vivaService.processAnswer(body.sessionId, body.answer);
+        const response = await this.vivaService.processAnswer(body.sessionId, body.answer);
+        return { response };
     }
     async getHistory(id) {
         return this.vivaService.getSessionHistory(id);
+    }
+    async getUserSessions(req) {
+        return this.vivaService.getUserSessions(req.user.userId);
+    }
+    async endSession(body) {
+        return this.vivaService.endSession(body.sessionId);
     }
 };
 exports.VivaController = VivaController;
@@ -61,6 +68,24 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], VivaController.prototype, "getHistory", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('history'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all viva sessions for the logged-in user' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], VivaController.prototype, "getUserSessions", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('end'),
+    (0, swagger_1.ApiOperation)({ summary: 'End / close a viva session' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], VivaController.prototype, "endSession", null);
 exports.VivaController = VivaController = __decorate([
     (0, swagger_1.ApiTags)('Viva Simulator'),
     (0, swagger_1.ApiBearerAuth)(),

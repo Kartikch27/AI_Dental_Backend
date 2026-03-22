@@ -29,7 +29,7 @@ let TestPapersService = class TestPapersService {
         this.ragService = ragService;
         this.syllabusService = syllabusService;
     }
-    async generateTest(userId, nodeId, config) {
+    async generateTest(userId, nodeId, config = {}) {
         const node = await this.prisma.syllabusNode.findUnique({ where: { id: nodeId } });
         if (!node)
             throw new Error('Node not found');

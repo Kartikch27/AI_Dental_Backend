@@ -9,6 +9,7 @@ import { NotesModule } from './modules/notes/notes.module';
 import { TestPapersModule } from './modules/test-papers/test-papers.module';
 import { VivaModule } from './modules/viva/viva.module';
 import { PdfModule } from './modules/pdf/pdf.module';
+import { HistoryModule } from './modules/history/history.module';
 import { BullModule } from '@nestjs/bullmq';
 import { RagModule } from './modules/rag/rag.module';
 import type { ConnectionOptions } from 'bullmq';
@@ -59,6 +60,7 @@ const enableRagQueue =
     TestPapersModule,
     VivaModule,
     PdfModule,
+    HistoryModule,
     ...(enableRagQueue && redisConnection
       ? [
           BullModule.forRoot({

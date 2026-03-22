@@ -23,7 +23,7 @@ let TestPapersController = class TestPapersController {
         this.testPapersService = testPapersService;
     }
     async generate(req, body) {
-        return this.testPapersService.generateTest(req.user.userId, body.nodeId, body.config);
+        return this.testPapersService.generateTest(req.user.userId, body.nodeId, body.config ?? {});
     }
     async getHistory(req) {
         return this.testPapersService.getHistory(req.user.userId);

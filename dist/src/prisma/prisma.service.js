@@ -8,23 +8,55 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var PrismaService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrismaService = void 0;
 const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
-let PrismaService = class PrismaService extends client_1.PrismaClient {
+let PrismaService = PrismaService_1 = class PrismaService extends client_1.PrismaClient {
+    logger = new common_1.Logger(PrismaService_1.name);
     constructor() {
-        super();
+        super({
+            datasources: {
+                db: { url: process.env.DATABASE_URL },
+            },
+            log: [],
+        });
+        this.$use(async (params, next) => {
+            const MAX_RETRIES = 3;
+            let attempt = 0;
+            while (true) {
+                try {
+                    return await next(params);
+                }
+                catch (err) {
+                    attempt++;
+                    const isRetryable = err?.code === 'P1001' || err?.code === 'P1002' || err?.code === 'P1008';
+                    if (isRetryable && attempt < MAX_RETRIES) {
+                        const delay = attempt * 1500;
+                        this.logger.warn(`DB connection error (${err.code}), retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`);
+                        await new Promise(r => setTimeout(r, delay));
+                        try {
+                            await this.$connect();
+                        }
+                        catch { }
+                        continue;
+                    }
+                    throw err;
+                }
+            }
+        });
     }
     async onModuleInit() {
         await this.$connect();
+        this.logger.log('Database connected');
     }
     async onModuleDestroy() {
         await this.$disconnect();
     }
 };
 exports.PrismaService = PrismaService;
-exports.PrismaService = PrismaService = __decorate([
+exports.PrismaService = PrismaService = PrismaService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
 ], PrismaService);

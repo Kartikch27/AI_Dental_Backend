@@ -28,4 +28,52 @@ export declare class VivaService {
         text: string;
         sessionId: string;
     }[]>;
+    getUserSessions(userId: string): Promise<({
+        node: {
+            id: string;
+            name: string;
+            type: import(".prisma/client").$Enums.NodeType;
+            orderIndex: number;
+            parentId: string | null;
+        };
+        messages: {
+            id: string;
+            role: string;
+            createdAt: Date;
+            text: string;
+            sessionId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        status: string;
+        nodeId: string;
+        userId: string;
+        score: number | null;
+        feedback: string | null;
+    })[]>;
+    endSession(sessionId: string): Promise<{
+        node: {
+            id: string;
+            name: string;
+            type: import(".prisma/client").$Enums.NodeType;
+            orderIndex: number;
+            parentId: string | null;
+        };
+        messages: {
+            id: string;
+            role: string;
+            createdAt: Date;
+            text: string;
+            sessionId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        status: string;
+        nodeId: string;
+        userId: string;
+        score: number | null;
+        feedback: string | null;
+    }>;
 }

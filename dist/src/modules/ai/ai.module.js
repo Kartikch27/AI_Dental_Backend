@@ -16,6 +16,7 @@ const gemini_provider_1 = require("./providers/gemini.provider");
 const groq_provider_1 = require("./providers/groq.provider");
 const mock_provider_1 = require("./providers/mock.provider");
 const openai_provider_1 = require("./providers/openai.provider");
+const sarvam_provider_1 = require("./providers/sarvam.provider");
 let AIModule = class AIModule {
 };
 exports.AIModule = AIModule;
@@ -27,14 +28,15 @@ exports.AIModule = AIModule = __decorate([
             openai_provider_1.OpenAIProvider,
             groq_provider_1.GroqProvider,
             anthropic_provider_1.AnthropicProvider,
+            sarvam_provider_1.SarvamProvider,
             mock_provider_1.MockProvider,
             {
                 provide: ai_provider_interface_1.AI_PROVIDER,
-                useFactory: (gemini, openai, groq, anthropic, mock) => {
+                useFactory: (gemini, openai, groq, anthropic, sarvam, mock) => {
                     const order = (0, ai_config_1.getAiProviderOrder)();
-                    return new ai_router_1.AIRouter(order, { gemini, openai, groq, anthropic, mock });
+                    return new ai_router_1.AIRouter(order, { gemini, openai, groq, anthropic, sarvam, mock });
                 },
-                inject: [gemini_provider_1.GeminiProvider, openai_provider_1.OpenAIProvider, groq_provider_1.GroqProvider, anthropic_provider_1.AnthropicProvider, mock_provider_1.MockProvider],
+                inject: [gemini_provider_1.GeminiProvider, openai_provider_1.OpenAIProvider, groq_provider_1.GroqProvider, anthropic_provider_1.AnthropicProvider, sarvam_provider_1.SarvamProvider, mock_provider_1.MockProvider],
             },
         ],
         exports: [ai_provider_interface_1.AI_PROVIDER],

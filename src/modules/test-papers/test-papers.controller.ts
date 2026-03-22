@@ -13,7 +13,7 @@ export class TestPapersController {
   @Post('generate')
   @ApiOperation({ summary: 'Generate new AI test paper' })
   async generate(@Request() req: any, @Body() body: any) {
-    return this.testPapersService.generateTest(req.user.userId, body.nodeId, body.config);
+    return this.testPapersService.generateTest(req.user.userId, body.nodeId, body.config ?? {});
   }
 
   @UseGuards(JwtAuthGuard)

@@ -45,6 +45,7 @@
     "ioredis": "^5.10.0",
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^5.0.7",
+    "marked": "^17.0.5",
     "openai": "^6.29.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -52,6 +53,7 @@
     "pdfjs-dist": "^4.10.38",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "sarvamai": "^1.1.6",
     "swagger-ui-express": "^5.0.1",
     "tesseract.js": "^7.0.0"
   },

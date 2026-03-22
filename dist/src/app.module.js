@@ -18,6 +18,7 @@ const notes_module_1 = require("./modules/notes/notes.module");
 const test_papers_module_1 = require("./modules/test-papers/test-papers.module");
 const viva_module_1 = require("./modules/viva/viva.module");
 const pdf_module_1 = require("./modules/pdf/pdf.module");
+const history_module_1 = require("./modules/history/history.module");
 const bullmq_1 = require("@nestjs/bullmq");
 const rag_module_1 = require("./modules/rag/rag.module");
 function getRedisConnection() {
@@ -65,6 +66,7 @@ exports.AppModule = AppModule = __decorate([
             test_papers_module_1.TestPapersModule,
             viva_module_1.VivaModule,
             pdf_module_1.PdfModule,
+            history_module_1.HistoryModule,
             ...(enableRagQueue && redisConnection
                 ? [
                     bullmq_1.BullModule.forRoot({

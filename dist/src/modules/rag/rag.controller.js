@@ -17,17 +17,20 @@ const common_1 = require("@nestjs/common");
 const generation_service_1 = require("./generation/generation.service");
 const swagger_1 = require("@nestjs/swagger");
 const jwt_auth_guard_js_1 = require("../auth/jwt-auth.guard.js");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let RagController = class RagController {
     generationService;
-    constructor(generationService) {
+    prisma;
+    constructor(generationService, prisma) {
         this.generationService = generationService;
+        this.prisma = prisma;
     }
     async generateStream(query, scope, history, res) {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
         try {
-            const stream = await this.generationService.generateResponse(query, scope, history);
+            const stream = await this.generationService.generateResponse(query, scope ?? {}, history ?? []);
             for await (const chunk of stream) {
                 const content = chunk.text || '';
                 if (content) {
@@ -37,8 +40,8 @@ let RagController = class RagController {
             res.write('data: [DONE]\n\n');
             res.end();
         }
-        catch (error) {
-            console.error('Streaming error:', error);
+        catch (err) {
+            console.error('Streaming error:', err);
             if (!res.headersSent) {
                 res.status(500).json({ error: 'Failed to generate response' });
             }
@@ -47,11 +50,30 @@ let RagController = class RagController {
             }
         }
     }
+    async chat(query, scope, history) {
+        return this.generationService.chat(query, scope ?? {}, history ?? []);
+    }
+    async scopeInfo(yearId, subjectId, chapterId, conceptId) {
+        const ids = [yearId, subjectId, chapterId, conceptId].filter(Boolean);
+        if (!ids.length)
+            return { year: null, subject: null, chapter: null, concept: null };
+        const nodes = await this.prisma.syllabusNode.findMany({
+            where: { id: { in: ids } },
+            select: { id: true, name: true, type: true },
+        });
+        const byId = new Map(nodes.map(n => [n.id, n]));
+        return {
+            year: yearId ? (byId.get(yearId) ?? null) : null,
+            subject: subjectId ? (byId.get(subjectId) ?? null) : null,
+            chapter: chapterId ? (byId.get(chapterId) ?? null) : null,
+            concept: conceptId ? (byId.get(conceptId) ?? null) : null,
+        };
+    }
 };
 exports.RagController = RagController;
 __decorate([
     (0, common_1.Post)('generate'),
-    (0, swagger_1.ApiOperation)({ summary: 'Generate a response based on RAG context with streaming' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Streaming RAG chat (SSE)' }),
     __param(0, (0, common_1.Body)('query')),
     __param(1, (0, common_1.Body)('scope')),
     __param(2, (0, common_1.Body)('history')),
@@ -60,11 +82,33 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Array, Object]),
     __metadata("design:returntype", Promise)
 ], RagController.prototype, "generateStream", null);
+__decorate([
+    (0, common_1.Post)('chat'),
+    (0, swagger_1.ApiOperation)({ summary: 'Non-streaming RAG chat (JSON response)' }),
+    __param(0, (0, common_1.Body)('query')),
+    __param(1, (0, common_1.Body)('scope')),
+    __param(2, (0, common_1.Body)('history')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Array]),
+    __metadata("design:returntype", Promise)
+], RagController.prototype, "chat", null);
+__decorate([
+    (0, common_1.Get)('scope-info'),
+    (0, swagger_1.ApiOperation)({ summary: 'Resolve scope IDs to human-readable names' }),
+    __param(0, (0, common_1.Query)('yearId')),
+    __param(1, (0, common_1.Query)('subjectId')),
+    __param(2, (0, common_1.Query)('chapterId')),
+    __param(3, (0, common_1.Query)('conceptId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], RagController.prototype, "scopeInfo", null);
 exports.RagController = RagController = __decorate([
-    (0, swagger_1.ApiTags)('RAG'),
+    (0, swagger_1.ApiTags)('RAG Chat'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_js_1.JwtAuthGuard),
     (0, common_1.Controller)('rag'),
-    __metadata("design:paramtypes", [generation_service_1.GenerationService])
+    __metadata("design:paramtypes", [generation_service_1.GenerationService,
+        prisma_service_1.PrismaService])
 ], RagController);
 //# sourceMappingURL=rag.controller.js.map
