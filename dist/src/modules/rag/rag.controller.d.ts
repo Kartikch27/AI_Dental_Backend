@@ -19,22 +19,22 @@ export declare class RagController {
         year: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
         } | null;
         subject: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
         } | null;
         chapter: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
         } | null;
         concept: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
         } | null;
     }>;
 }

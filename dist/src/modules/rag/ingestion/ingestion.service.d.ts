@@ -22,11 +22,11 @@ export declare class IngestionService {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     processFile(title: string, file: any, metadata: any): Promise<{
         id: string;
@@ -42,11 +42,11 @@ export declare class IngestionService {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     retryIngestion(documentId: string): Promise<{
         message: string;

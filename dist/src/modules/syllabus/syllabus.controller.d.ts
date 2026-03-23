@@ -6,7 +6,7 @@ export declare class SyllabusController {
     getRoots(): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     }[]>;
@@ -14,7 +14,7 @@ export declare class SyllabusController {
     getChildren(id: string): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     }[]>;
@@ -39,7 +39,7 @@ export declare class SyllabusController {
     }): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     }>;

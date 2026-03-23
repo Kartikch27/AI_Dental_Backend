@@ -14,30 +14,36 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       log: [],
     });
 
-    // Middleware: auto-retry on P1001 (can't reach DB) and P1002 (timeout) — NeonDB wakes up
-    this.$use(async (params, next) => {
-      const MAX_RETRIES = 3;
-      let attempt = 0;
-      while (true) {
-        try {
-          return await next(params);
-        } catch (err: any) {
-          attempt++;
-          const isRetryable =
-            err?.code === 'P1001' || err?.code === 'P1002' || err?.code === 'P1008';
-          if (isRetryable && attempt < MAX_RETRIES) {
-            const delay = attempt * 1500; // 1.5s, 3s
-            this.logger.warn(
-              `DB connection error (${err.code}), retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`,
-            );
-            await new Promise(r => setTimeout(r, delay));
-            try { await this.$connect(); } catch { /* ignore reconnect errors */ }
-            continue;
-          }
-          throw err;
-        }
-      }
+    const extended = this.$extends({
+      query: {
+        $allModels: {
+          async $allOperations({ operation, model, args, query }) {
+            const MAX_RETRIES = 3;
+            let attempt = 0;
+            while (true) {
+              try {
+                return await query(args);
+              } catch (err: any) {
+                attempt++;
+                const isRetryable =
+                  err?.code === 'P1001' || err?.code === 'P1002' || err?.code === 'P1008';
+                if (isRetryable && attempt < MAX_RETRIES) {
+                  const delay = attempt * 1500; // 1.5s, 3s
+                  console.warn(
+                    `DB connection error (${err.code}), retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`,
+                  );
+                  await new Promise((r) => setTimeout(r, delay));
+                  continue;
+                }
+                throw err;
+              }
+            }
+          },
+        },
+      },
     });
+
+    return extended as any;
   }
 
   async onModuleInit() {

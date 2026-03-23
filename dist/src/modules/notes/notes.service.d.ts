@@ -13,32 +13,32 @@ export declare class NotesService {
         node: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
             orderIndex: number;
             parentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
-        content: string;
         nodeId: string;
-        style: import(".prisma/client").$Enums.GenerationType;
+        content: string;
         userId: string;
+        style: import("@prisma/client").$Enums.GenerationType;
     }>;
     getUserNotes(userId: string): Promise<({
         node: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
             orderIndex: number;
             parentId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
-        content: string;
         nodeId: string;
-        style: import(".prisma/client").$Enums.GenerationType;
+        content: string;
         userId: string;
+        style: import("@prisma/client").$Enums.GenerationType;
     })[]>;
 }

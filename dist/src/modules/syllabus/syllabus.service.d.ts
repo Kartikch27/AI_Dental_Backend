@@ -25,21 +25,21 @@ export declare class SyllabusService {
     getRoots(): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     }[]>;
     getChildren(parentId: string): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     }[]>;
     getNodeById(id: string): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     } | null>;
@@ -51,7 +51,7 @@ export declare class SyllabusService {
     }): Promise<{
         id: string;
         name: string;
-        type: import(".prisma/client").$Enums.NodeType;
+        type: import("@prisma/client").$Enums.NodeType;
         orderIndex: number;
         parentId: string | null;
     }>;

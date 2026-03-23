@@ -7,7 +7,7 @@ export declare class AuthController {
         email: string;
         password: string;
         fullName: string | null;
-        role: import(".prisma/client").$Enums.Role;
+        role: import("@prisma/client").$Enums.Role;
         createdAt: Date;
         updatedAt: Date;
     }>;

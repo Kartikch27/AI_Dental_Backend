@@ -20,11 +20,11 @@ export declare class RagService {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     ingestFile(title: string, file: any, metadata: any): Promise<{
         id: string;
@@ -40,11 +40,11 @@ export declare class RagService {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     retrieveContext(query: string, scope: {
         nodeId?: string;
@@ -60,7 +60,7 @@ export declare class RagService {
         node: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
             orderIndex: number;
             parentId: string | null;
         } | null;
@@ -78,11 +78,11 @@ export declare class RagService {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     deleteDocument(id: string): Promise<{
         success: boolean;

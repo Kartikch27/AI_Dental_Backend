@@ -22,30 +22,33 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
             },
             log: [],
         });
-        this.$use(async (params, next) => {
-            const MAX_RETRIES = 3;
-            let attempt = 0;
-            while (true) {
-                try {
-                    return await next(params);
-                }
-                catch (err) {
-                    attempt++;
-                    const isRetryable = err?.code === 'P1001' || err?.code === 'P1002' || err?.code === 'P1008';
-                    if (isRetryable && attempt < MAX_RETRIES) {
-                        const delay = attempt * 1500;
-                        this.logger.warn(`DB connection error (${err.code}), retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`);
-                        await new Promise(r => setTimeout(r, delay));
-                        try {
-                            await this.$connect();
+        const extended = this.$extends({
+            query: {
+                $allModels: {
+                    async $allOperations({ operation, model, args, query }) {
+                        const MAX_RETRIES = 3;
+                        let attempt = 0;
+                        while (true) {
+                            try {
+                                return await query(args);
+                            }
+                            catch (err) {
+                                attempt++;
+                                const isRetryable = err?.code === 'P1001' || err?.code === 'P1002' || err?.code === 'P1008';
+                                if (isRetryable && attempt < MAX_RETRIES) {
+                                    const delay = attempt * 1500;
+                                    console.warn(`DB connection error (${err.code}), retrying in ${delay}ms (attempt ${attempt}/${MAX_RETRIES})`);
+                                    await new Promise((r) => setTimeout(r, delay));
+                                    continue;
+                                }
+                                throw err;
+                            }
                         }
-                        catch { }
-                        continue;
-                    }
-                    throw err;
-                }
-            }
+                    },
+                },
+            },
         });
+        return extended;
     }
     async onModuleInit() {
         await this.$connect();

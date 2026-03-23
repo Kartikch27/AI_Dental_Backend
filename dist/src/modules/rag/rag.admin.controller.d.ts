@@ -68,11 +68,11 @@ export declare class RagAdminController {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     ingestFile(file: any, title: string, metadataStr: string): Promise<{
         id: string;
@@ -88,11 +88,11 @@ export declare class RagAdminController {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     retryIngestion(id: string): Promise<{
         message: string;
@@ -105,7 +105,7 @@ export declare class RagAdminController {
         node: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
             orderIndex: number;
             parentId: string | null;
         } | null;
@@ -123,11 +123,11 @@ export declare class RagAdminController {
         subjectId: string | null;
         chapterId: string | null;
         conceptId: string | null;
+        nodeId: string | null;
         status: string;
-        ingestionStatus: import(".prisma/client").$Enums.IngestionStatus;
+        ingestionStatus: import("@prisma/client").$Enums.IngestionStatus;
         failureReason: string | null;
         processedAt: Date | null;
-        nodeId: string | null;
     }>;
     getChunks(id: string): Promise<any>;
     deleteDocument(id: string): Promise<{

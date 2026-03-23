@@ -6,8 +6,8 @@ export declare class VivaController {
         session: {
             id: string;
             createdAt: Date;
-            status: string;
             nodeId: string;
+            status: string;
             userId: string;
             score: number | null;
             feedback: string | null;
@@ -21,14 +21,14 @@ export declare class VivaController {
         id: string;
         role: string;
         createdAt: Date;
-        text: string;
         sessionId: string;
+        text: string;
     }[]>;
     getUserSessions(req: any): Promise<({
         node: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
             orderIndex: number;
             parentId: string | null;
         };
@@ -36,14 +36,14 @@ export declare class VivaController {
             id: string;
             role: string;
             createdAt: Date;
-            text: string;
             sessionId: string;
+            text: string;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        status: string;
         nodeId: string;
+        status: string;
         userId: string;
         score: number | null;
         feedback: string | null;
@@ -52,7 +52,7 @@ export declare class VivaController {
         node: {
             id: string;
             name: string;
-            type: import(".prisma/client").$Enums.NodeType;
+            type: import("@prisma/client").$Enums.NodeType;
             orderIndex: number;
             parentId: string | null;
         };
@@ -60,14 +60,14 @@ export declare class VivaController {
             id: string;
             role: string;
             createdAt: Date;
-            text: string;
             sessionId: string;
+            text: string;
         }[];
     } & {
         id: string;
         createdAt: Date;
-        status: string;
         nodeId: string;
+        status: string;
         userId: string;
         score: number | null;
         feedback: string | null;

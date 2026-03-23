@@ -7,31 +7,31 @@ export declare class HistoryController {
             node: {
                 id: string;
                 name: string;
-                type: import(".prisma/client").$Enums.NodeType;
+                type: import("@prisma/client").$Enums.NodeType;
                 orderIndex: number;
                 parentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            content: string;
             nodeId: string;
-            style: import(".prisma/client").$Enums.GenerationType;
+            content: string;
             userId: string;
+            style: import("@prisma/client").$Enums.GenerationType;
         })[];
         testPapers: ({
             node: {
                 id: string;
                 name: string;
-                type: import(".prisma/client").$Enums.NodeType;
+                type: import("@prisma/client").$Enums.NodeType;
                 orderIndex: number;
                 parentId: string | null;
             };
         } & {
             id: string;
             createdAt: Date;
-            content: string;
             nodeId: string;
+            content: string;
             userId: string;
             config: import("@prisma/client/runtime/library").JsonValue;
         })[];
@@ -39,7 +39,7 @@ export declare class HistoryController {
             node: {
                 id: string;
                 name: string;
-                type: import(".prisma/client").$Enums.NodeType;
+                type: import("@prisma/client").$Enums.NodeType;
                 orderIndex: number;
                 parentId: string | null;
             };
@@ -47,14 +47,14 @@ export declare class HistoryController {
                 id: string;
                 role: string;
                 createdAt: Date;
-                text: string;
                 sessionId: string;
+                text: string;
             }[];
         } & {
             id: string;
             createdAt: Date;
-            status: string;
             nodeId: string;
+            status: string;
             userId: string;
             score: number | null;
             feedback: string | null;
